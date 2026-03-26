@@ -42,7 +42,6 @@ const gameController = () => {
   playerO.placeMarker(Gameboard.gameboard, 2, 2);
   playerO.placeMarker(Gameboard.gameboard, 0, 2);
   playerO.placeMarker(Gameboard.gameboard, 1, 1);
-  playerO.placeMarker(Gameboard.gameboard, 2, 0);
   console.log(Gameboard.gameboard);
   const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
   const [ row1, row2, row3 ] = Gameboard.gameboard;
@@ -60,6 +59,8 @@ const gameController = () => {
   console.log({ diag1, diag2 })
   const diagWin = allEqual(diag1) || allEqual(diag2);
   console.log(diagWin)
+  const win = rowWin || colWin || diagWin;
+  console.log(win)
 }
 
 gameController()
