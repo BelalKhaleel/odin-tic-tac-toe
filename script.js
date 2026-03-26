@@ -37,7 +37,7 @@ const gameController = () => {
   const playerX = createPlayer("X");
   const playerO = createPlayer("O");
   playerX.placeMarker(Gameboard.gameboard, 1, 0);
-  playerX.placeMarker(Gameboard.gameboard, 1, 1);
+  playerX.placeMarker(Gameboard.gameboard, 0, 0);
   playerX.placeMarker(Gameboard.gameboard, 1, 2);
   playerO.placeMarker(Gameboard.gameboard, 2, 2);
   console.log(Gameboard.gameboard);
@@ -46,6 +46,12 @@ const gameController = () => {
   console.log({row1, row2, row3});
   const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
   console.log(rowWin);
+  const col1 = [row1[0], row2[0], row3[0]];
+  const col2 = [row1[1], row2[1], row3[1]];
+  const col3 = [row1[2], row2[2], row3[2]];
+  console.log({ col1, col2, col3 })
+  const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
+  console.log(colWin)
 }
 
 gameController()
