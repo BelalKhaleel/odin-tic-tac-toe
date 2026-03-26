@@ -33,10 +33,20 @@ function createPlayer(marker) {
   };
 }
 
-const playerX = createPlayer("X");
-playerX.placeMarker(Gameboard.gameboard, 1, 2);
-console.log(Gameboard.gameboard);
-const playerO = createPlayer("O");
-playerO.placeMarker(Gameboard.gameboard, 2, 2);
-console.log(Gameboard.gameboard);
+const gameController = () => {
+  const playerX = createPlayer("X");
+  const playerO = createPlayer("O");
+  playerX.placeMarker(Gameboard.gameboard, 1, 0);
+  playerX.placeMarker(Gameboard.gameboard, 1, 1);
+  playerX.placeMarker(Gameboard.gameboard, 1, 2);
+  playerO.placeMarker(Gameboard.gameboard, 2, 2);
+  console.log(Gameboard.gameboard);
+  const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
+  const [ row1, row2, row3 ] = Gameboard.gameboard;
+  console.log({row1, row2, row3});
+  const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
+  console.log(rowWin);
+}
+
+gameController()
 // create an object to control the flow of the game. it should contain methods to declare winner
