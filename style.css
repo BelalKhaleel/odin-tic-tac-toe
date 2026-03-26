@@ -1,54 +1,11 @@
+html {
+  box-sizing: border-box;
+}
+
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+  box-sizing: inherit;
   margin: 0;
   padding: 0;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1em;
-  width: 500px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.reset {
-  cursor: pointer;
-  padding: .4em;
-}
-
-.board {
-  display: grid;
-  height: 500px;
-  width: 100%;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  border: 1px solid black;
-  gap: 2px;
-  padding: 2px;
-}
-
-.cell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 6rem;
-  border: 1px solid grey;
-  background: lightyellow;
-  cursor: pointer;
 }
