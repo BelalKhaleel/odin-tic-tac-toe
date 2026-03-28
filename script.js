@@ -42,24 +42,11 @@ const gameController = (() => {
   const playerX = createPlayer("X");
   const playerO = createPlayer("O");
   // check who's turn it is and prevent a player from playing 2 consecutive times
-  let playerXTurn = true;
-  const getCurrentPlayer = () => playerXTurn ? playerX : playerO;
-  const switchTurns = () => playerXTurn = !playerXTurn;
-  // console.log("current player: ", getCurrentPlayer().marker)
-  // switchTurns();
-  // console.log("current player: ", getCurrentPlayer().marker)
-  // switchTurns();
-  // console.log("current player: ", getCurrentPlayer().marker)
-  // switchTurns();
-  // console.log("current player: ", getCurrentPlayer().marker)
-  const addMarker = (rowIndex, cellIndex) => {
-    const currentPlayer = getCurrentPlayer();
-    currentPlayer.placeMarker(Gameboard.gameboard, rowIndex, cellIndex);
-  }
-  const getCurrentMarker = () => {
-    const currentPlayer = getCurrentPlayer();
-    return currentPlayer.getMarker();
-  }
+  let currentPlayer = playerX;
+  const switchTurns = () => currentPlayer.getMarker() === "X" ? currentPlayer = playerO : currentPlayer = playerX;
+  const addMarker = (rowIndex, cellIndex) => currentPlayer.placeMarker(Gameboard.gameboard, rowIndex, cellIndex);
+  
+  const getCurrentMarker = () => currentPlayer.getMarker();
 
   // const getCellMarker = (row, cell) => Gameboard.gameboard[row][cell];
   // console.log(getCellMarker(0, 0));
@@ -86,7 +73,7 @@ const gameController = (() => {
   }
   const play = (rowIndex, cellIndex) => {
     const gameEnded = checkWin();
-    console.log(getCurrentPlayer().getMarker())
+    console.log(getCurrentMarker())
     console.log("game ended: ", gameEnded);
     if (gameEnded) {
       console.table(Gameboard.gameboard);
