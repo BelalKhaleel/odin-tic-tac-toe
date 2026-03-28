@@ -24,25 +24,48 @@ function createPlayer(marker) {
     if (cellIndex < 0 || cellIndex > 2) {
       throw new Error("Cell index should be between 0 and 2");
     }
-    if (gameboard[rowIndex][cellIndex] !== "")
+    if (gameboard[rowIndex][cellIndex] !== "") {
       throw new Error("Cannot place marker in an unempty cell");
+    }
     gameboard[rowIndex][cellIndex] = marker;
   }
+  const getMarker = () => marker;
   return {
+    getMarker,
     placeMarker,
   };
 }
 
-const gameController = () => {
+// create an object to control the flow of the game. it should contain methods to declare winner
+const gameController = (() => {
+  // assign to each player a marker
   const playerX = createPlayer("X");
   const playerO = createPlayer("O");
-  playerX.placeMarker(Gameboard.gameboard, 1, 0);
-  playerX.placeMarker(Gameboard.gameboard, 0, 0);
-  playerX.placeMarker(Gameboard.gameboard, 1, 2);
-  playerO.placeMarker(Gameboard.gameboard, 2, 2);
-  playerO.placeMarker(Gameboard.gameboard, 0, 2);
-  playerO.placeMarker(Gameboard.gameboard, 1, 1);
+  // check who's turn it is and prevent a player from playing 2 consecutive times
+  let playerXTurn = true;
+  const getCurrentPlayer = () => playerXTurn ? playerX : playerO;
+  const switchTurns = () => playerXTurn = !playerXTurn;
+  // console.log("current player: ", getCurrentPlayer().marker)
+  // switchTurns();
+  // console.log("current player: ", getCurrentPlayer().marker)
+  // switchTurns();
+  // console.log("current player: ", getCurrentPlayer().marker)
+  // switchTurns();
+  // console.log("current player: ", getCurrentPlayer().marker)
+  const addMarker = (rowIndex, cellIndex) => {
+    let currentPlayer = getCurrentPlayer();
+    currentPlayer.placeMarker(Gameboard.gameboard, rowIndex, cellIndex);
+    switchTurns();
+  }
+  addMarker(1, 0);
+  addMarker(2, 2);
+  addMarker(0, 0);
+  addMarker(0, 2);
+  addMarker(1, 2);
+  addMarker(1, 1);
   console.log(Gameboard.gameboard);
+  // const getCellMarker = (row, cell) => Gameboard.gameboard[row][cell];
+  // console.log(getCellMarker(0, 0));
   const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
   const [ row1, row2, row3 ] = Gameboard.gameboard;
   console.log({row1, row2, row3});
@@ -60,8 +83,11 @@ const gameController = () => {
   const diagWin = allEqual(diag1) || allEqual(diag2);
   console.log(diagWin)
   const win = rowWin || colWin || diagWin;
-  console.log(win)
-}
+  const checkWin = () => win;
+  console.log(checkWin());
+  // add logic to check for flow of the game, when it ends and who won
+  // if there's a winning condition, prevent players from adding markers to the board and check which player won.
+  return 
+})();
 
-gameController()
-// create an object to control the flow of the game. it should contain methods to declare winner
+// Create a displayController to control DOM manipulation
