@@ -53,16 +53,27 @@ const gameController = (() => {
   // switchTurns();
   // console.log("current player: ", getCurrentPlayer().marker)
   const addMarker = (rowIndex, cellIndex) => {
-    let currentPlayer = getCurrentPlayer();
+    const currentPlayer = getCurrentPlayer();
     currentPlayer.placeMarker(Gameboard.gameboard, rowIndex, cellIndex);
     switchTurns();
   }
+  const getCurrentMarker = () => {
+    const currentPlayer = getCurrentPlayer();
+    return currentPlayer.getMarker();
+  }
+  console.log(getCurrentMarker());
   addMarker(1, 0);
+  console.log(getCurrentMarker());
   addMarker(2, 2);
+  console.log(getCurrentMarker());
   addMarker(0, 0);
+  console.log(getCurrentMarker());
   addMarker(0, 2);
+  console.log(getCurrentMarker());
   addMarker(1, 2);
+  console.log(getCurrentMarker());
   addMarker(1, 1);
+  console.log(getCurrentMarker());
   console.log(Gameboard.gameboard);
   // const getCellMarker = (row, cell) => Gameboard.gameboard[row][cell];
   // console.log(getCellMarker(0, 0));
