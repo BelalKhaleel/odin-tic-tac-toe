@@ -55,47 +55,57 @@ const gameController = (() => {
   const addMarker = (rowIndex, cellIndex) => {
     const currentPlayer = getCurrentPlayer();
     currentPlayer.placeMarker(Gameboard.gameboard, rowIndex, cellIndex);
-    switchTurns();
   }
   const getCurrentMarker = () => {
     const currentPlayer = getCurrentPlayer();
     return currentPlayer.getMarker();
   }
-  console.log(getCurrentMarker());
-  addMarker(1, 0);
-  console.log(getCurrentMarker());
-  addMarker(2, 2);
-  console.log(getCurrentMarker());
-  addMarker(0, 0);
-  console.log(getCurrentMarker());
-  addMarker(0, 2);
-  console.log(getCurrentMarker());
-  addMarker(1, 2);
-  console.log(getCurrentMarker());
-  addMarker(1, 1);
-  console.log(getCurrentMarker());
-  console.log(Gameboard.gameboard);
+
   // const getCellMarker = (row, cell) => Gameboard.gameboard[row][cell];
   // console.log(getCellMarker(0, 0));
-  const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
-  const [ row1, row2, row3 ] = Gameboard.gameboard;
-  console.log({row1, row2, row3});
-  const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
-  console.log(rowWin);
-  const col1 = [row1[0], row2[0], row3[0]];
-  const col2 = [row1[1], row2[1], row3[1]];
-  const col3 = [row1[2], row2[2], row3[2]];
-  console.log({ col1, col2, col3 })
-  const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
-  console.log(colWin)
-  const diag1 = [row1[0], row2[1], row3[2]];
-  const diag2 = [row1[2], row2[1], row3[0]];
-  console.log({ diag1, diag2 })
-  const diagWin = allEqual(diag1) || allEqual(diag2);
-  console.log(diagWin)
-  const win = rowWin || colWin || diagWin;
-  const checkWin = () => win;
-  console.log(checkWin());
+  function checkWin() {
+    const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
+    const [ row1, row2, row3 ] = Gameboard.gameboard;
+    console.log({row1, row2, row3});
+    const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
+    console.log("row win: ",rowWin);
+    const col1 = [row1[0], row2[0], row3[0]];
+    const col2 = [row1[1], row2[1], row3[1]];
+    const col3 = [row1[2], row2[2], row3[2]];
+    console.log({ col1, col2, col3 })
+    const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
+    console.log("column win: ",colWin)
+    const diag1 = [row1[0], row2[1], row3[2]];
+    const diag2 = [row1[2], row2[1], row3[0]];
+    console.log({ diag1, diag2 })
+    const diagWin = allEqual(diag1) || allEqual(diag2);
+    console.log("diagonal win: ",diagWin)
+    const win = rowWin || colWin || diagWin;
+    console.log("win: ",win);
+    return win;
+  }
+  const play = (rowIndex, cellIndex) => {
+    const gameEnded = checkWin();
+    console.log(getCurrentPlayer().getMarker())
+    console.log("game ended: ", gameEnded);
+    if (gameEnded) {
+      console.table(Gameboard.gameboard);
+      switchTurns();
+      const winner = getCurrentMarker();
+      return `The winner is player ${winner}!`;
+    }
+    addMarker(rowIndex, cellIndex);
+    switchTurns();
+  }
+    console.log(play(1, 0));
+    console.log(play(2, 2));
+    console.log(play(0, 0));
+    console.log(play(0, 2));
+    console.log(play(1, 2));
+    console.log(play(1, 1));
+    console.log(play(0, 1));
+    console.log(play(2, 0));
+    console.log(play(2, 1));
   // add logic to check for flow of the game, when it ends and who won
   // if there's a winning condition, prevent players from adding markers to the board and check which player won.
   return 
