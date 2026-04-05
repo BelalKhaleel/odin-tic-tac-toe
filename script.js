@@ -1,10 +1,11 @@
-// create a gameboard array having 3 arrays (rows) each containing 3 markers inside a gameboard object
-// gameboard should have a method to clear all rows upon reset
 const Gameboard = (() => {
   const ROWS = 3;
   const CELLS_PER_ROW = 3;
-  const gameboard = Array.from(Array(ROWS), () => Array(CELLS_PER_ROW).fill(""));
-  const addMarker = (player, row, column) => player.placeMarker(gameboard, row, column);
+  const gameboard = Array.from(Array(ROWS), () =>
+    Array(CELLS_PER_ROW).fill(""),
+  );
+  const addMarker = (player, row, column) =>
+    player.placeMarker(gameboard, row, column);
   const getBoard = () => gameboard;
   const reset = () => gameboard.forEach((row) => row.fill(""));
   return {
@@ -14,7 +15,6 @@ const Gameboard = (() => {
   };
 })();
 
-// create a factory function for creating player objects having marker props and place marker methods
 function createPlayer(marker) {
   marker = marker.toUpperCase();
   const placeMarker = (gameboard, row, column) => {
@@ -25,26 +25,23 @@ function createPlayer(marker) {
       throw new Error("Cell index should be between 0 and 2");
     }
     if (gameboard[row][column] !== "") {
-      console.error("Cannot place marker in empty");
+      console.error("Cannot place marker in non-empty cell");
+      return;
     }
     gameboard[row][column] = marker;
-  }
+  };
   const getMarker = () => marker;
+
   return {
-    marker,
     getMarker,
     placeMarker,
   };
 }
 
-const getUserChoice = () => "X";
-// create an object to control the flow of the game. it should contain methods to declare winner
 const gameController = (() => {
-  // create the player objects based on the user's choice
-  // once the user object is created, a com object should be automatically created having the other marker
-  // assign to each player a marker
-  const createPlayers = () => {
-    const userChoice = getUserChoice();
+  const createPlayers = (userChoice) => {
+    if (!userChoice) return;
+    console.log(userChoice);
     if (typeof userChoice !== "string")
       throw new Error("User choice must be a string.");
     if (userChoice !== "X" && userChoice !== "O") {
@@ -64,102 +61,193 @@ const gameController = (() => {
     return [user, com];
   };
 
-  const players = createPlayers();
-  const playerX = players.find((player) => player.getMarker() === "X");
-  const playerO = players.find((player) => player.getMarker() === "O");
-  // check who's turn it is and prevent a player from playing 2 consecutive times
-  let activePlayer = playerX;
-  const switchPlayer = () => activePlayer = activePlayer === playerX ? playerO : playerX;
-  const getActivePlayer = () => activePlayer;
-  // const addMarker = (rowIndex, cellIndex) => activePlayer.placeMarker(Gameboard.getBoard(), rowIndex, cellIndex);
+  function allEqual(arr) {
+    return arr.every((v) => v !== "" && v === arr[0]);
+  }
 
-  const getCurrentMarker = () => activePlayer.getMarker();
+  let winningMarker = "";
 
-  // const getCellMarker = (row, cell) => Gameboard.gameboard[row][cell];
-  // console.log(getCellMarker(0, 0));
   function checkWin() {
-    const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
-    const [ row1, row2, row3 ] = Gameboard.getBoard();
-    console.log({row1, row2, row3});
-    const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
-    console.log("row win: ",rowWin);
+    const [row1, row2, row3] = Gameboard.getBoard();
+    console.log({ row1, row2, row3 });
     const col1 = [row1[0], row2[0], row3[0]];
     const col2 = [row1[1], row2[1], row3[1]];
     const col3 = [row1[2], row2[2], row3[2]];
-    console.log({ col1, col2, col3 })
-    const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
-    console.log("column win: ",colWin)
+    console.log({ col1, col2, col3 });
     const diag1 = [row1[0], row2[1], row3[2]];
     const diag2 = [row1[2], row2[1], row3[0]];
-    console.log({ diag1, diag2 })
+    console.log({ diag1, diag2 });
+
+    const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
+    console.log("row win: ", rowWin);
+    const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
+    console.log("column win: ", colWin);
     const diagWin = allEqual(diag1) || allEqual(diag2);
-    console.log("diagonal win: ",diagWin)
-    const win = rowWin || colWin || diagWin;
-    console.log("win: ",win);
-    return win;
-  }
-
-  function getRandomIntInclusive(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  const comPlay = () => {
-    const gameboard = Gameboard.getBoard();
-    const randomRow = getRandomIntInclusive(0, 2);
-    console.log(randomRow)
-    const randomColumn = getRandomIntInclusive(0, 2);
-    console.log(randomColumn)
-    if (gameboard[randomRow][randomColumn] !== "") {
-      console.log("Cell not empty!")
-      comPlay();
+    console.log("diagonal win: ", diagWin);
+    const haveWinner = rowWin || colWin || diagWin;
+    if (allEqual(row1)) {
+      winningMarker = row1[0];
+    } else if (allEqual(row2)) {
+      winningMarker = row2[0];
+    } else if (allEqual(row3)) {
+      winningMarker = row3[0];
+    } else if (allEqual(col1)) {
+      winningMarker = col1[0];
+    } else if (allEqual(col2)) {
+      winningMarker = col2[0];
+    } else if (allEqual(col3)) {
+      winningMarker = col3[0];
+    } else if (allEqual(diag1)) {
+      winningMarker = diag1[0];
+    } else if (allEqual(diag2)) {
+      winningMarker = diag2[0];
     }
-    Gameboard.addMarker(activePlayer, randomRow, randomColumn);
+
+    console.log("win: ", haveWinner);
+    return haveWinner;
   }
 
-  const play = (row, column) => {
-    console.log(getCurrentMarker());
-    const gameEnded = checkWin();
+  const gameboard = Gameboard.getBoard();
+
+  const comPlay = (com) => {
+    const availableRows = gameboard.reduce((accumulator, row, index) => {
+      if (row.includes("")) accumulator.push(index);
+      return accumulator;
+    }, []);
+
+    console.log("available rows: ", availableRows);
+    const randomRow =
+      availableRows[Math.floor(Math.random() * availableRows.length)];
+    const availableColumns = gameboard[randomRow].reduce(
+      (accumulator, column, index) => {
+        if (column === "") accumulator.push(index);
+        return accumulator;
+      },
+      [],
+    );
+
+    const randomColumn =
+      availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    Gameboard.addMarker(com, randomRow, randomColumn);
+  };
+
+  const play = (user, com, row, column) => {
+    let gameEnded = checkWin();
     console.log("game ended: ", gameEnded);
     if (gameEnded) {
-      console.table(Gameboard.getBoard());
-      switchPlayer();
-      const winner = getCurrentMarker();
-      return `The winner is player ${winner}!`;
+      console.table(gameboard);
+      return;
     }
-    Gameboard.addMarker(activePlayer, row, column);
-    switchPlayer();
-    comPlay();
-    console.table(Gameboard.getBoard());
-  };
-  // add logic to check for flow of the game, when it ends and who won
-  // if there's a winning condition, prevent players from adding markers to the board and check which player won.
-  return {
-    players,
-    getActivePlayer,
-    play,
-  };
-})();
-console.log(gameController.play(1, 0));
-console.log(gameController.play(2, 2));
-// console.log(gameController.play(0, 0));
-// console.log(gameController.play(0, 2));
-// console.log(gameController.play(1, 2));
-// console.log(gameController.play(1, 1));
-// console.log(gameController.play(0, 1));
-// console.log(gameController.play(2, 0));
-// console.log(gameController.play(2, 1));
 
-// console.log({ user, com }) 
-// console.log(user.getMarker())
-// console.log(com.getMarker())
-// console.log(gameController.firstPlayer([user, com]))
-console.log(gameController.getActivePlayer())
-// Create a displayController to control DOM manipulation
-const displayController = (() => {
-  // const markers = document.querySelector(".markers");
-  // markers.addEventListener("click", (e) => {
-  //   console.log(e.target.value)
-  // })
+    if (user.getMarker() === "X") {
+      if (gameboard[row][column] !== "") return;
+      Gameboard.addMarker(user, row, column);
+
+      gameEnded = checkWin();
+      if (gameEnded) {
+        console.table(gameboard);
+        return;
+      }
+
+      comPlay(com);
+      console.table(gameboard);
+    } else {
+      comPlay(com);
+
+      gameEnded = checkWin();
+      if (gameEnded) {
+        console.table(gameboard);
+        return;
+      }
+
+      if (gameboard[row][column] !== "") return;
+      Gameboard.addMarker(user, row, column);
+      gameEnded = checkWin();
+      if (gameEnded) {
+        console.table(gameboard);
+        return;
+      }
+    }
+  };
+
+  const getWinner = () => winningMarker;
+
+  const resetGame = () => {
+    Gameboard.reset();
+    winningMarker = "";
+  };
+
+  return {
+    createPlayers,
+    play,
+    getWinner,
+    resetGame,
+  };
 })();
+
+const displayController = (() => {
+  const gameboard = Gameboard.getBoard();
+  const markers = document.querySelector(".markers");
+  const startResetBtn = document.querySelector(".start-reset-btn");
+  const gameboardDiv = document.querySelector(".gameboard");
+  const boardCells = document.querySelectorAll(".gameboard button");
+  const result = document.querySelector(".result");
+  const errorMessage = document.querySelector(".error-message");
+
+  let user = (com = {});
+
+  const handleMarkersClick = (e) => {
+    const marker = e.target.value;
+    [user, com] = gameController.createPlayers(marker);
+    errorMessage.textContent = "";
+  };
+
+  const startGame = () => {
+    markers.addEventListener("click", handleMarkersClick, { once: true });
+  };
+
+  const updateBoardDisplay = () => {
+    const cellsValues = gameboard.flat();
+    boardCells.forEach((cell) => (cell.textContent = cellsValues.shift()));
+  };
+
+  const updateBoard = () => {
+    gameboardDiv.addEventListener("click", (e) => {
+      const cell = e.target;
+      const row = Number(cell.dataset.row);
+      const column = Number(cell.dataset.column);
+      console.log({ user });
+      console.log({ com });
+      if (Object.keys(user).length === 0 || Object.keys(com).length === 0) {
+        console.log("Please select a marker");
+        errorMessage.textContent = "*Please select a marker!";
+        return;
+      }
+      gameController.play(user, com, row, column);
+      updateBoardDisplay();
+      const winner = gameController.getWinner();
+      if (winner) result.textContent = `The winner is ${winner}!`;
+    });
+  };
+
+  const resetGame = () => {
+    startResetBtn.addEventListener("click", () => {
+      gameController.resetGame();
+      updateBoardDisplay();
+      user = com = {};
+      markers.addEventListener("click", handleMarkersClick, { once: true });
+      result.textContent = "";
+      errorMessage.textContent = "";
+    });
+  };
+
+  return {
+    startGame,
+    updateBoard,
+    resetGame,
+  };
+})();
+
+displayController.startGame();
+displayController.resetGame();
+displayController.updateBoard();
