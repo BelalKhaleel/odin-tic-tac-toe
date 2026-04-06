@@ -4,20 +4,8 @@ const Gameboard = (() => {
   const gameboard = Array.from(Array(ROWS), () =>
     Array(CELLS_PER_ROW).fill(""),
   );
-  const addMarker = (player, row, column) =>
-    player.placeMarker(gameboard, row, column);
-  const getBoard = () => gameboard;
-  const reset = () => gameboard.forEach((row) => row.fill(""));
-  return {
-    getBoard,
-    addMarker,
-    reset,
-  };
-})();
-
-function createPlayer(marker) {
-  marker = marker.toUpperCase();
-  const placeMarker = (gameboard, row, column) => {
+  const addMarker = (marker, row, column) =>
+  { 
     if (row < 0 || row > 2) {
       throw new Error("Row index should be between 0 and 2");
     }
@@ -29,12 +17,22 @@ function createPlayer(marker) {
       return;
     }
     gameboard[row][column] = marker;
+  }
+  const getBoard = () => gameboard;
+  const reset = () => gameboard.forEach((row) => row.fill(""));
+  return {
+    getBoard,
+    addMarker,
+    reset,
   };
+})();
+
+function createPlayer(marker) {
+  marker = marker.toUpperCase();
   const getMarker = () => marker;
 
   return {
     getMarker,
-    placeMarker,
   };
 }
 
@@ -105,6 +103,7 @@ const gameController = (() => {
     return haveWinner;
   }
 
+  // add a check for draw function
   const comPlay = (com) => {
     const availableRows = Gameboard.getBoard().reduce(
       (accumulator, row, index) => {
@@ -127,18 +126,20 @@ const gameController = (() => {
 
     const randomColumn =
       availableColumns[Math.floor(Math.random() * availableColumns.length)];
-    Gameboard.addMarker(com, randomRow, randomColumn);
+    const marker = com.getMarker();
+    Gameboard.addMarker(marker, randomRow, randomColumn);
     gameEnded = checkWin();
     console.log("game ended: ", gameEnded);
     if (gameEnded) {
-      console.table(gameboard);
+      console.table(Gameboard.getBoard());
       return;
     }
   };
 
   const play = (user, row, column) => {
     if (Gameboard.getBoard()[row][column] !== "") return;
-    Gameboard.addMarker(user, row, column);
+    const marker = user.getMarker();
+    Gameboard.addMarker(marker, row, column);
 
     gameEnded = checkWin();
     if (gameEnded) {
@@ -165,13 +166,14 @@ const gameController = (() => {
 
 const displayController = (() => {
   const markers = document.querySelector(".markers");
-  const startResetBtn = document.querySelector(".start-reset-btn");
+  const resetBtn = document.querySelector(".reset-btn");
   const gameboardDiv = document.querySelector(".gameboard");
   const boardCells = document.querySelectorAll(".gameboard button");
   const result = document.querySelector(".result");
   const errorMessage = document.querySelector(".error-message");
 
-  let user = (com = {});
+  let user = {};
+  let com = {};
 
   const updateBoardDisplay = () => {
     const cellsValues = Gameboard.getBoard().flat();
@@ -226,7 +228,7 @@ const displayController = (() => {
   };
 
   const resetGame = () => {
-    startResetBtn.addEventListener("click", () => {
+    resetBtn.addEventListener("click", () => {
       gameController.resetGame();
       updateBoardDisplay();
       user = com = {};
