@@ -56,8 +56,6 @@ const gameController = (() => {
       com = createPlayer("X");
       user = createPlayer("O");
     }
-    user.isUser = true;
-    com.isUser = false;
     return [user, com];
   };
 
@@ -107,18 +105,19 @@ const gameController = (() => {
     return haveWinner;
   }
 
-  const gameboard = Gameboard.getBoard();
-
   const comPlay = (com) => {
-    const availableRows = gameboard.reduce((accumulator, row, index) => {
-      if (row.includes("")) accumulator.push(index);
-      return accumulator;
-    }, []);
+    const availableRows = Gameboard.getBoard().reduce(
+      (accumulator, row, index) => {
+        if (row.includes("")) accumulator.push(index);
+        return accumulator;
+      },
+      [],
+    );
 
     console.log("available rows: ", availableRows);
     const randomRow =
       availableRows[Math.floor(Math.random() * availableRows.length)];
-    const availableColumns = gameboard[randomRow].reduce(
+    const availableColumns = Gameboard.getBoard()[randomRow].reduce(
       (accumulator, column, index) => {
         if (column === "") accumulator.push(index);
         return accumulator;
@@ -129,44 +128,22 @@ const gameController = (() => {
     const randomColumn =
       availableColumns[Math.floor(Math.random() * availableColumns.length)];
     Gameboard.addMarker(com, randomRow, randomColumn);
-  };
-
-  const play = (user, com, row, column) => {
-    let gameEnded = checkWin();
+    gameEnded = checkWin();
     console.log("game ended: ", gameEnded);
     if (gameEnded) {
       console.table(gameboard);
       return;
     }
+  };
 
-    if (user.getMarker() === "X") {
-      if (gameboard[row][column] !== "") return;
-      Gameboard.addMarker(user, row, column);
+  const play = (user, row, column) => {
+    if (Gameboard.getBoard()[row][column] !== "") return;
+    Gameboard.addMarker(user, row, column);
 
-      gameEnded = checkWin();
-      if (gameEnded) {
-        console.table(gameboard);
-        return;
-      }
-
-      comPlay(com);
-      console.table(gameboard);
-    } else {
-      comPlay(com);
-
-      gameEnded = checkWin();
-      if (gameEnded) {
-        console.table(gameboard);
-        return;
-      }
-
-      if (gameboard[row][column] !== "") return;
-      Gameboard.addMarker(user, row, column);
-      gameEnded = checkWin();
-      if (gameEnded) {
-        console.table(gameboard);
-        return;
-      }
+    gameEnded = checkWin();
+    if (gameEnded) {
+      console.table(Gameboard.getBoard());
+      return;
     }
   };
 
@@ -179,6 +156,7 @@ const gameController = (() => {
 
   return {
     createPlayers,
+    comPlay,
     play,
     getWinner,
     resetGame,
@@ -186,7 +164,6 @@ const gameController = (() => {
 })();
 
 const displayController = (() => {
-  const gameboard = Gameboard.getBoard();
   const markers = document.querySelector(".markers");
   const startResetBtn = document.querySelector(".start-reset-btn");
   const gameboardDiv = document.querySelector(".gameboard");
@@ -196,19 +173,23 @@ const displayController = (() => {
 
   let user = (com = {});
 
+  const updateBoardDisplay = () => {
+    const cellsValues = Gameboard.getBoard().flat();
+    boardCells.forEach((cell) => (cell.textContent = cellsValues.shift()));
+  };
+
   const handleMarkersClick = (e) => {
     const marker = e.target.value;
     [user, com] = gameController.createPlayers(marker);
+    if (com.getMarker() === "X") {
+      gameController.comPlay(com);
+      setTimeout(() => updateBoardDisplay(), 500);
+    }
     errorMessage.textContent = "";
   };
 
   const startGame = () => {
     markers.addEventListener("click", handleMarkersClick, { once: true });
-  };
-
-  const updateBoardDisplay = () => {
-    const cellsValues = gameboard.flat();
-    boardCells.forEach((cell) => (cell.textContent = cellsValues.shift()));
   };
 
   const updateBoard = () => {
@@ -223,10 +204,24 @@ const displayController = (() => {
         errorMessage.textContent = "*Please select a marker!";
         return;
       }
-      gameController.play(user, com, row, column);
+      gameController.play(user, row, column);
       updateBoardDisplay();
       const winner = gameController.getWinner();
-      if (winner) result.textContent = `The winner is ${winner}!`;
+      if (winner) {
+        result.textContent = `The winner is ${winner}!`;
+        return;
+      }
+      gameController.comPlay(com);
+      gameboardDiv.style.pointerEvents = "none";
+      setTimeout(() => {
+        updateBoardDisplay();
+        gameboardDiv.style.pointerEvents = "";
+        const winner = gameController.getWinner();
+        if (winner) {
+          result.textContent = `The winner is ${winner}!`;
+          return;
+        }
+      }, 500);
     });
   };
 
