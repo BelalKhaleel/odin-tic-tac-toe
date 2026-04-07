@@ -128,12 +128,7 @@ const gameController = (() => {
       availableColumns[Math.floor(Math.random() * availableColumns.length)];
     const marker = com.getMarker();
     Gameboard.addMarker(marker, randomRow, randomColumn);
-    gameEnded = checkWin();
-    console.log("game ended: ", gameEnded);
-    if (gameEnded) {
-      console.table(Gameboard.getBoard());
-      return;
-    }
+    checkWin();
   };
 
   const play = (user, row, column) => {
@@ -141,7 +136,7 @@ const gameController = (() => {
     const marker = user.getMarker();
     Gameboard.addMarker(marker, row, column);
 
-    gameEnded = checkWin();
+    const gameEnded = checkWin();
     if (gameEnded) {
       console.table(Gameboard.getBoard());
       return;
@@ -248,3 +243,43 @@ const displayController = (() => {
 displayController.startGame();
 displayController.resetGame();
 displayController.updateBoard();
+
+// Good progress. Most of the previous issues are fixed. Here's what's still remaining:
+
+// **1. `gameEnded` is still an implicit global.**
+
+// In both `comPlay` and `play`:
+// ```js
+// gameEnded = checkWin(); // no let/const/var
+// ```
+
+// You never declared `gameEnded` anywhere. This silently creates a global variable. Should be `const gameEnded = checkWin()`.
+
+// **2. `comPlay` checks for a win but nobody outside knows about it.**
+
+// You call `checkWin()` inside `comPlay`, which sets `winningMarker` — fine. But `comPlay` doesn't return anything, so `displayController` has to call `getWinner()` separately after the timeout to find out. That's what you're already doing, so it works. Just be aware that the `if (gameEnded) { console.table(...); return; }` block inside `comPlay` is dead weight — the early return just exits `comPlay` itself, it doesn't stop `displayController` from continuing. The flow control there does nothing useful.
+
+// **3. Still missing draw detection.**
+
+// You even left yourself a comment:
+// ```js
+// // add a check for draw function
+// ```
+
+// The board can fill up with no winner and the game silently stops responding to clicks. A draw is just when all 9 cells are filled and `winningMarker` is still empty:
+
+// ```js
+// const checkDraw = () => Gameboard.getBoard().flat().every(cell => cell !== "");
+// ```
+
+// Call it after `checkWin()` returns false, and expose the result so `displayController` can display a "It's a draw!" message.
+
+// **4. `user = com = {}` chained assignment is back in `resetGame`.**
+
+// You fixed the declaration at the top (`let user = {}; let com = {};`) but then reset them with a chained assignment again. Just do:
+// ```js
+// user = {};
+// com = {};
+// ```
+
+// Those are the remaining issues. The core architecture is clean at this point.
