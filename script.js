@@ -156,6 +156,7 @@ const displayController = (() => {
   const boardCells = document.querySelectorAll(".gameboard button");
   const result = document.querySelector(".result");
   const errorMessage = document.querySelector(".error-message");
+  const markerButtons = document.querySelectorAll(".marker");
 
   let user = {};
   let com = {};
@@ -166,12 +167,14 @@ const displayController = (() => {
   };
 
   const handleMarkersClick = (e) => {
+    const button = e.target;
     const marker = e.target.value;
     [user, com] = gameController.createPlayers(marker);
     if (com.getMarker() === "X") {
       gameController.comPlay(com);
       setTimeout(() => updateBoardDisplay(), 500);
     }
+    button.classList.add("active-btn");
     errorMessage.textContent = "";
   };
 
@@ -218,6 +221,7 @@ const displayController = (() => {
 
   const resetGame = () => {
     resetBtn.addEventListener("click", () => {
+      markerButtons.forEach(btn => btn.classList.remove("active-btn"));
       gameController.resetGame();
       updateBoardDisplay();
       user = {};

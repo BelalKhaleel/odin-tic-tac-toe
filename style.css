@@ -27,15 +27,35 @@ aside {
   gap: 1rem;
 }
 
+aside h1 {
+  margin-bottom: 6rem;
+}
+
 aside button {
-  font-size: 1.5rem;
-  padding: 5px;
   border-radius: 5px;
   pointer-events: auto;
 }
 
 .markers {
   pointer-events: none;
+}
+
+.marker {
+  font-size: 3rem;
+  padding: .5rem 1rem;
+}
+
+aside button:hover {
+  background-color: gold;
+}
+
+.active-btn {
+  background-color: gold;
+}
+
+.reset-btn {
+  font-size: 1.5rem;
+  padding: 12px;
 }
 
 main {
@@ -47,13 +67,17 @@ main {
   align-items: center;
 }
 
-.result {
-  font-size: 3rem;
+.instructions {
+  font-size: 1.5rem;
 }
 
 .error-message {
   font-size: 2rem;
   color: red;
+}
+
+.result {
+  font-size: 3rem;
 }
 
 .gameboard {
