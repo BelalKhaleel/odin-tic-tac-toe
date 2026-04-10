@@ -4,8 +4,7 @@ const Gameboard = (() => {
   const gameboard = Array.from(Array(ROWS), () =>
     Array(CELLS_PER_ROW).fill(""),
   );
-  const addMarker = (marker, row, column) =>
-  { 
+  const addMarker = (marker, row, column) => {
     if (row < 0 || row > 2) {
       throw new Error("Row index should be between 0 and 2");
     }
@@ -13,11 +12,10 @@ const Gameboard = (() => {
       throw new Error("Cell index should be between 0 and 2");
     }
     if (gameboard[row][column] !== "") {
-      console.error("Cannot place marker in non-empty cell");
       return;
     }
     gameboard[row][column] = marker;
-  }
+  };
   const getBoard = () => gameboard;
   const reset = () => gameboard.forEach((row) => row.fill(""));
   return {
@@ -39,7 +37,6 @@ function createPlayer(marker) {
 const gameController = (() => {
   const createPlayers = (userChoice) => {
     if (!userChoice) return;
-    console.log(userChoice);
     if (typeof userChoice !== "string")
       throw new Error("User choice must be a string.");
     if (userChoice !== "X" && userChoice !== "O") {
@@ -57,29 +54,21 @@ const gameController = (() => {
     return [user, com];
   };
 
-  function allEqual(arr) {
-    return arr.every((v) => v !== "" && v === arr[0]);
-  }
+  const allEqual = (arr) => arr.every((v) => v !== "" && v === arr[0]);
 
   let winningMarker = "";
 
-  function checkWin() {
+  const checkWin = () => {
     const [row1, row2, row3] = Gameboard.getBoard();
-    console.log({ row1, row2, row3 });
     const col1 = [row1[0], row2[0], row3[0]];
     const col2 = [row1[1], row2[1], row3[1]];
     const col3 = [row1[2], row2[2], row3[2]];
-    console.log({ col1, col2, col3 });
     const diag1 = [row1[0], row2[1], row3[2]];
     const diag2 = [row1[2], row2[1], row3[0]];
-    console.log({ diag1, diag2 });
 
     const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
-    console.log("row win: ", rowWin);
     const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
-    console.log("column win: ", colWin);
     const diagWin = allEqual(diag1) || allEqual(diag2);
-    console.log("diagonal win: ", diagWin);
     const haveWinner = rowWin || colWin || diagWin;
     if (allEqual(row1)) {
       winningMarker = row1[0];
@@ -99,9 +88,8 @@ const gameController = (() => {
       winningMarker = diag2[0];
     }
 
-    console.log("win: ", haveWinner);
     return haveWinner;
-  }
+  };
 
   const checkDraw = () =>
     Gameboard.getBoard()
@@ -117,11 +105,7 @@ const gameController = (() => {
       [],
     );
 
-    if (availableRows.length === 0) {
-      console.error("No more available rows!");
-      return;
-    }
-    console.log("available rows: ", availableRows);
+    if (availableRows.length === 0) return;
     const randomRow =
       availableRows[Math.floor(Math.random() * availableRows.length)];
     const availableColumns = Gameboard.getBoard()[randomRow].reduce(
@@ -145,10 +129,7 @@ const gameController = (() => {
     Gameboard.addMarker(marker, row, column);
 
     const gameEnded = checkWin();
-    if (gameEnded) {
-      console.table(Gameboard.getBoard());
-      return;
-    }
+    if (gameEnded) return;
   };
 
   const getWinner = () => winningMarker;
@@ -198,15 +179,17 @@ const displayController = (() => {
     markers.addEventListener("click", handleMarkersClick, { once: true });
   };
 
+  const endGame = (message) => {
+    result.textContent = message;
+    gameboardDiv.style.pointerEvents = "none";
+  };
+
   const updateBoard = () => {
     gameboardDiv.addEventListener("click", (e) => {
       const cell = e.target;
       const row = Number(cell.dataset.row);
       const column = Number(cell.dataset.column);
-      console.log({ user });
-      console.log({ com });
       if (Object.keys(user).length === 0 || Object.keys(com).length === 0) {
-        console.log("Please select a marker");
         errorMessage.textContent = "*Please select a marker!";
         return;
       }
@@ -214,28 +197,22 @@ const displayController = (() => {
       updateBoardDisplay();
       const winner = gameController.getWinner();
       if (winner) {
-        result.textContent = `The winner is ${winner}!`;
+        endGame(`The winner is ${winner}!`);
         return;
       }
       gameController.comPlay(com);
-      gameboardDiv.style.pointerEvents = "none";
       setTimeout(() => {
         updateBoardDisplay();
-        gameboardDiv.style.pointerEvents = "";
         const winner = gameController.getWinner();
         if (winner) {
-          result.textContent = `The winner is ${winner}!`;
+          endGame(`The winner is ${winner}!`);
+          return;
+        }
+        if (gameController.checkDraw()) {
+          endGame(`It's a draw!`);
           return;
         }
       }, 500);
-      setTimeout(() => {
-        const haveDraw = gameController.checkDraw();
-        if (haveDraw) {
-          result.textContent = `It's a draw!`;
-          return;
-        }
-      }, 600);
-
     });
   };
 
@@ -248,6 +225,7 @@ const displayController = (() => {
       markers.addEventListener("click", handleMarkersClick, { once: true });
       result.textContent = "";
       errorMessage.textContent = "";
+      gameboardDiv.style.pointerEvents = "";
     });
   };
 
@@ -261,18 +239,3 @@ const displayController = (() => {
 displayController.startGame();
 displayController.resetGame();
 displayController.updateBoard();
-
-// **3. Still missing draw detection.**
-
-// You even left yourself a comment:
-// ```js
-// // add a check for draw function
-// ```
-
-// The board can fill up with no winner and the game silently stops responding to clicks. A draw is just when all 9 cells are filled and `winningMarker` is still empty:
-
-// ```js
-// const checkDraw = () => Gameboard.getBoard().flat().every(cell => cell !== "");
-// ```
-
-// Call it after `checkWin()` returns false, and expose the result so `displayController` can display a "It's a draw!" message.
