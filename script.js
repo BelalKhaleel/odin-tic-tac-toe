@@ -37,14 +37,16 @@ function createPlayer(marker) {
 const gameController = (() => {
   const createPlayers = (userChoice) => {
     if (!userChoice) return;
-    if (typeof userChoice !== "string")
+    if (typeof userChoice !== "string") {
       throw new Error("User choice must be a string.");
+    }
+    userChoice = userChoice.trim().toUpperCase();
     if (userChoice !== "X" && userChoice !== "O") {
       throw new Error("Marker should be either X or O");
     }
     let user = {};
     let com = {};
-    if (userChoice.trim().toUpperCase() === "X") {
+    if (userChoice === "X") {
       user = createPlayer("X");
       com = createPlayer("O");
     } else {
@@ -60,31 +62,40 @@ const gameController = (() => {
 
   const checkWin = () => {
     const [row1, row2, row3] = Gameboard.getBoard();
+
     const col1 = [row1[0], row2[0], row3[0]];
     const col2 = [row1[1], row2[1], row3[1]];
     const col3 = [row1[2], row2[2], row3[2]];
     const diag1 = [row1[0], row2[1], row3[2]];
     const diag2 = [row1[2], row2[1], row3[0]];
 
-    const rowWin = allEqual(row1) || allEqual(row2) || allEqual(row3);
-    const colWin = allEqual(col1) || allEqual(col2) || allEqual(col3);
-    const diagWin = allEqual(diag1) || allEqual(diag2);
-    const haveWinner = rowWin || colWin || diagWin;
-    if (allEqual(row1)) {
+    const row1Win = allEqual(row1);
+    const row2Win = allEqual(row2);
+    const row3Win = allEqual(row3);
+    const col1Win = allEqual(col1);
+    const col2Win = allEqual(col2);
+    const col3Win = allEqual(col3);
+    const diag1Win = allEqual(diag1);
+    const diag2Win = allEqual(diag2);
+
+    const haveWinner =
+      row1Win || row2Win || row3Win || col1Win || col2Win || col3Win || diag1Win || diag2Win;
+
+    if (row1Win) {
       winningMarker = row1[0];
-    } else if (allEqual(row2)) {
+    } else if (row2Win) {
       winningMarker = row2[0];
-    } else if (allEqual(row3)) {
+    } else if (row3Win) {
       winningMarker = row3[0];
-    } else if (allEqual(col1)) {
+    } else if (col1Win) {
       winningMarker = col1[0];
-    } else if (allEqual(col2)) {
+    } else if (col2Win) {
       winningMarker = col2[0];
-    } else if (allEqual(col3)) {
+    } else if (col3Win) {
       winningMarker = col3[0];
-    } else if (allEqual(diag1)) {
+    } else if (diag1Win) {
       winningMarker = diag1[0];
-    } else if (allEqual(diag2)) {
+    } else if (diag2Win) {
       winningMarker = diag2[0];
     }
 
@@ -201,6 +212,10 @@ const displayController = (() => {
       const winner = gameController.getWinner();
       if (winner) {
         endGame(`The winner is ${winner}!`);
+        return;
+      }
+      if (gameController.checkDraw()) {
+        endGame(`It's a draw!`);
         return;
       }
       gameController.comPlay(com);
