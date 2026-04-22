@@ -178,8 +178,9 @@ const displayController = (() => {
   };
 
   const handleMarkersClick = (e) => {
-    const button = e.target;
-    const marker = e.target.value;
+    const button = e.target.closest(".marker");
+    if (!button) return;
+    const marker = button.value;
     [user, com] = gameController.createPlayers(marker);
     if (com.getMarker() === "X") {
       gameController.comPlay(com);
@@ -193,14 +194,30 @@ const displayController = (() => {
     markers.addEventListener("click", handleMarkersClick, { once: true });
   };
 
+  
   const endGame = (message) => {
     result.textContent = message;
     gameboardDiv.style.pointerEvents = "none";
   };
-
+  
+  const checkEndGame = () => {
+    const winner = gameController.getWinner();
+    if (winner) {
+      endGame(`The winner is ${winner}!`);
+      return true;
+    }
+    const haveDraw = gameController.checkDraw();
+    if (haveDraw) {
+      endGame(`It's a draw!`);
+      return true;
+    }
+    return false;
+  }
   const updateBoard = () => {
     gameboardDiv.addEventListener("click", (e) => {
-      const cell = e.target;
+      const cell = e.target.closest("button[data-row][data-column]");
+      if (!cell) return;
+      if (cell.textContent) return;
       const row = Number(cell.dataset.row);
       const column = Number(cell.dataset.column);
       if (Object.keys(user).length === 0 || Object.keys(com).length === 0) {
@@ -209,27 +226,14 @@ const displayController = (() => {
       }
       gameController.play(user, row, column);
       updateBoardDisplay();
-      const winner = gameController.getWinner();
-      if (winner) {
-        endGame(`The winner is ${winner}!`);
-        return;
-      }
-      if (gameController.checkDraw()) {
-        endGame(`It's a draw!`);
-        return;
-      }
+      const gameOver = checkEndGame();
+      if (gameOver) return;
       gameController.comPlay(com);
+      gameboardDiv.style.pointerEvents = "none";
       setTimeout(() => {
         updateBoardDisplay();
-        const winner = gameController.getWinner();
-        if (winner) {
-          endGame(`The winner is ${winner}!`);
-          return;
-        }
-        if (gameController.checkDraw()) {
-          endGame(`It's a draw!`);
-          return;
-        }
+        gameboardDiv.style.pointerEvents = "";
+        checkEndGame();
       }, 500);
     });
   };

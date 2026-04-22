@@ -36,10 +36,6 @@ aside button {
   pointer-events: auto;
 }
 
-.markers {
-  pointer-events: none;
-}
-
 .marker {
   font-size: 3rem;
   padding: .5rem 1rem;
