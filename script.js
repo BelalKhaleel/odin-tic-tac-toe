@@ -78,9 +78,6 @@ const gameController = (() => {
     const diag1Win = allEqual(diag1);
     const diag2Win = allEqual(diag2);
 
-    const haveWinner =
-      row1Win || row2Win || row3Win || col1Win || col2Win || col3Win || diag1Win || diag2Win;
-
     if (row1Win) {
       winningMarker = row1[0];
     } else if (row2Win) {
@@ -98,8 +95,6 @@ const gameController = (() => {
     } else if (diag2Win) {
       winningMarker = diag2[0];
     }
-
-    return haveWinner;
   };
 
   const checkDraw = () =>
@@ -135,15 +130,20 @@ const gameController = (() => {
   };
 
   const play = (user, row, column) => {
-    if (Gameboard.getBoard()[row][column] !== "") return;
+    if (Gameboard.getBoard()[row][column] !== "") return false;
     const marker = user.getMarker();
     Gameboard.addMarker(marker, row, column);
-
-    const gameEnded = checkWin();
-    if (gameEnded) return;
+    checkWin();
+    return true;
   };
 
   const getWinner = () => winningMarker;
+
+  const getGameStatus = () => {
+    if (winningMarker) return "win";
+    if (checkDraw()) return "draw";
+    return null;
+  }
 
   const resetGame = () => {
     Gameboard.reset();
@@ -154,7 +154,7 @@ const gameController = (() => {
     createPlayers,
     comPlay,
     play,
-    checkDraw,
+    getGameStatus,
     getWinner,
     resetGame,
   };
@@ -194,37 +194,39 @@ const displayController = (() => {
     markers.addEventListener("click", handleMarkersClick, { once: true });
   };
 
-  
   const endGame = (message) => {
     result.textContent = message;
     gameboardDiv.style.pointerEvents = "none";
   };
   
   const checkEndGame = () => {
+    // gameController.checkWin();
+    const status = gameController.getGameStatus();
     const winner = gameController.getWinner();
-    if (winner) {
-      endGame(`The winner is ${winner}!`);
-      return true;
+    switch(status) {
+      case "win":
+        endGame(`The winner is ${winner}!`);
+        return true;
+      case "draw":
+        endGame(`It's a draw!`);
+        return true;
+      default:
+        return false;
     }
-    const haveDraw = gameController.checkDraw();
-    if (haveDraw) {
-      endGame(`It's a draw!`);
-      return true;
-    }
-    return false;
   }
+
   const updateBoard = () => {
     gameboardDiv.addEventListener("click", (e) => {
       const cell = e.target.closest("button[data-row][data-column]");
       if (!cell) return;
-      if (cell.textContent) return;
       const row = Number(cell.dataset.row);
       const column = Number(cell.dataset.column);
       if (Object.keys(user).length === 0 || Object.keys(com).length === 0) {
         errorMessage.textContent = "*Please select a marker!";
         return;
       }
-      gameController.play(user, row, column);
+      const placed = gameController.play(user, row, column);
+      if (!placed) return;
       updateBoardDisplay();
       const gameOver = checkEndGame();
       if (gameOver) return;
